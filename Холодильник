@@ -1,0 +1,120 @@
+import datetime
+from decimal import Decimal
+DATE_FORMAT = '%Y-%m-%d'
+
+#items->словарь
+#title->ключ в словаре
+#amount->количество
+#expiration_date-> дата годности
+
+
+goods = {}
+
+
+
+def add(items, title, amount, expiration_date=None):
+    if expiration_date != None:
+        expiration_date = datetime.datetime.strptime(expiration_date, DATE_FORMAT).date()
+        if title not in  items:
+            items[title] =[{'amount': Decimal(amount), 'expiration_date': expiration_date}]
+        else:
+            items[title].append = {'amount': Decimal(amount), 'expiration_date': expiration_date}
+    else:
+        if title not in items:
+            items[title] = {'amount': Decimal(amount), 'expiration_date': expiration_date}
+        else:
+            items[title].append = {'amount': Decimal(amount), 'expiration_date': expiration_date}
+
+def add_by_note(items, note):
+    result = note.split(' ') # Разделитель в заметках будет пробел (хотя точка и пробел намного проще:))
+    #print(result)
+    #print(result[-1])
+    title = ''
+    if len(list(result[-1])) == 10:
+        #print('YES')
+        expiration_date = result[-1]
+        #print(expiration_date)
+        amount = result[-2]
+        #print(amount)
+        for i in range(-len(result), -2):
+            title += result[i] + ' '
+    else:
+        #print('NO')
+        expiration_date = None
+        amount = result[-1]
+        #print(amount)
+        for i in range(-len(result), -1):
+            title += result[i] + ' '
+    print(title)
+    add(items, title, amount, expiration_date=None)
+     # Можно вызвать функцию add, чтоб не повторять код
+
+def find(items, needle):
+    result = []
+    [result.append(title) for title in items if needle.lower() in title.lower()]
+    return result
+
+def amount(items, needle):
+    total_amount = Decimal('0')
+    print(type(total_amount))
+    for title in find(items, needle):
+        #print(title)
+        for item in items[title]:
+            #print(item)
+            total_amount += item['amount']
+            #print(total_amount)
+    return total_amount
+def expire(items,in_advance_days=0):
+    result=[]
+    today=datetime.date.today()
+    data_advance = today + datetime.timedelta(days=in_advance_days)
+    for title, parts in items.items():
+        amount= Decimal(0)
+        if parts['expiration_date'] and parts['expiration_date']<=data_advance:
+            amount+=parts['amount']
+            if amount>0:
+                list.append(result,(title,amount))
+
+    return result
+
+print('Вывод начальный список продуктов')
+print(goods)
+add(goods, title = 'пельмени неуниверсальные', amount = Decimal(5.5), expiration_date = '2332-12-01')
+add(goods, title = 'яйца куриные', amount = Decimal(5), expiration_date = '2030-12-01')
+add(goods, title = 'хлеб белый', amount = Decimal(5), expiration_date = '2024-03-09')
+add(goods, title = 'хлеб черный', amount = Decimal(5))
+
+
+print()
+print('Вывод списка продуктов после добавления через add')
+print(goods)
+
+
+#add_by_note
+add_by_note(goods, 'суп 1 2025-01-20')
+add_by_note(goods, 'вареники с картошкой 16 2029-01-20')
+add_by_note(goods, 'вареники с вишней 16')
+print()
+print('Добавление в список через заметку')
+print(goods)
+
+
+#FIND
+print()
+print('Поиск в холодильнике')
+print(find(goods, 'пель'))
+print(find(goods, 'вар'))
+
+# Вывод количества продуктов
+print()
+print('Вывод количества продуктов')
+print(amount(goods, 'пельмени универсальные'))
+print(amount(goods, 'настойка'))
+
+# Вывод продуктов по окончанию срока годности
+print()
+print('Вывод продуктов по окончанию срока годности')
+print(datetime.date.today())
+print(expire(goods))
+print(expire(goods, 1))
+print(expire(goods, 5))
